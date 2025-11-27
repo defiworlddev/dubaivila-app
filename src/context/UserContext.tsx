@@ -18,10 +18,30 @@ export const UserProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check for existing session
-    const currentUser = authService.getCurrentUser();
-    setUser(currentUser);
-    setIsLoading(false);
+    // Check for existing session and refresh user data from server
+    const initializeUser = async () => {
+      const token = authService.getToken();
+      
+      if (token) {
+        // If token exists, fetch fresh user data from server
+        try {
+          const freshUser = await authService.fetchCurrentUser();
+          setUser(freshUser);
+        } catch (error) {
+          // If fetch fails, fall back to localStorage
+          const storedUser = authService.getCurrentUser();
+          setUser(storedUser);
+        }
+      } else {
+        // No token, just load from localStorage if available
+        const storedUser = authService.getCurrentUser();
+        setUser(storedUser);
+      }
+      
+      setIsLoading(false);
+    };
+
+    initializeUser();
   }, []);
 
   const login = async (phoneNumber: string) => {

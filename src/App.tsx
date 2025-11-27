@@ -7,6 +7,7 @@ import { Verification } from './components/Verification';
 import { Registration } from './components/Registration';
 import { RequestList } from './components/RequestList';
 import { RequestForm } from './components/RequestForm';
+import { RequestDetail } from './components/RequestDetail';
 
 const AppRoutes = () => {
   const { isLoading } = useUser();
@@ -41,6 +42,16 @@ const AppRoutes = () => {
           <ProtectedRoute>
             <Layout>
               <RequestForm />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/request/:id"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <RequestDetail />
             </Layout>
           </ProtectedRoute>
         }

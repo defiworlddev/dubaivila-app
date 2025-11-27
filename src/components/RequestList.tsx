@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { EstateRequest, requestService } from '../service/requestService';
 import { useUser } from '../context/UserContext';
+import { formatMoney } from '../utils/formatMoney';
 
 // Import property type images
 import villaImage from '../assets/villa.webp';
@@ -89,9 +90,10 @@ export const RequestList = () => {
       ) : (
         <div className="grid gap-4">
           {requests.map((request) => (
-            <div
+            <Link
               key={request.id}
-              className="bg-white rounded-lg border border-primary-200 hover:border-primary-300 hover:shadow-md transition-all overflow-hidden"
+              to={`/request/${request.id}`}
+              className="bg-white rounded-lg border border-primary-200 hover:border-primary-300 hover:shadow-md transition-all overflow-hidden block"
             >
               <div className="flex">
                 {/* Image */}
@@ -128,14 +130,14 @@ export const RequestList = () => {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="text-sm font-semibold text-primary-900">
-                          {request.budget}
+                          {formatMoney(request.budget)}
                         </span>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       )}

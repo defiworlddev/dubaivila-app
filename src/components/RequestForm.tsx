@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { requestService } from '../service/requestService';
 import { useUser } from '../context/UserContext';
+import { formatMoney } from '../utils/formatMoney';
 
 // Import property type images
 import villaImage from '../assets/villa.webp';
@@ -441,7 +442,7 @@ export const RequestForm = () => {
                             </svg>
                             <div className="flex-1">
                               <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Budget Range</p>
-                              <p className="text-base font-semibold text-primary-900">{formData.budget}</p>
+                              <p className="text-base font-semibold text-primary-900">{formatMoney(formData.budget)}</p>
                             </div>
                           </div>
                         </div>

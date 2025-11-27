@@ -5,6 +5,7 @@ export interface User {
   phoneNumber: string;
   name?: string;
   isNewUser: boolean;
+  isAgent?: boolean;
 }
 
 export interface AuthState {
@@ -18,6 +19,7 @@ interface ServerUser {
   phoneNumber: string;
   name?: string;
   isNewUser: boolean;
+  isAgent?: boolean;
 }
 
 class AuthService {
@@ -29,6 +31,7 @@ class AuthService {
       phoneNumber: serverUser.phoneNumber,
       name: serverUser.name,
       isNewUser: serverUser.isNewUser,
+      isAgent: serverUser.isAgent,
     };
   }
 
@@ -67,6 +70,27 @@ class AuthService {
     this.saveUser(user);
     this.saveToken(response.token);
     return user;
+  }
+
+  async fetchCurrentUser(): Promise<User | null> {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+
+    try {
+      const response = await api.get<{ user: ServerUser }>('/api/auth/user');
+      const user = this.convertServerUser(response.user);
+      this.currentUser = user;
+      this.saveUser(user); // Save to localStorage
+      console.log('User data saved to localStorage:', user);
+      return user;
+    } catch (error) {
+      // If token is invalid, clear it and return null
+      console.error('Error fetching user:', error);
+      this.logout();
+      return null;
+    }
   }
 
   getCurrentUser(): User | null {

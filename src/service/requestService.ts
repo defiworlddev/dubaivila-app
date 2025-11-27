@@ -1,4 +1,5 @@
 import { api } from './api';
+import { authService } from './authService';
 
 export interface EstateRequest {
   id: string;
@@ -13,6 +14,7 @@ export interface EstateRequest {
   additionalRequirements?: string;
   status: 'pending' | 'in_progress' | 'completed';
   createdAt: string;
+  userPhoneNumber?: string;
 }
 
 interface ServerEstateRequest {
@@ -28,6 +30,7 @@ interface ServerEstateRequest {
   additionalRequirements?: string;
   status: 'pending' | 'in_progress' | 'completed';
   createdAt: string;
+  userPhoneNumber?: string;
 }
 
 class RequestService {
@@ -45,6 +48,7 @@ class RequestService {
       additionalRequirements: serverRequest.additionalRequirements,
       status: serverRequest.status,
       createdAt: serverRequest.createdAt,
+      userPhoneNumber: serverRequest.userPhoneNumber,
     };
   }
 
@@ -74,9 +78,14 @@ class RequestService {
   }
 
   async getRequestById(requestId: string): Promise<EstateRequest> {
-    const response = await api.get<{ request: ServerEstateRequest }>(
-      `/api/estate/requests/${requestId}`
-    );
+    const user = authService.getCurrentUser();
+    const isAgent = user?.isAgent;
+    
+    const endpoint = isAgent 
+      ? `/api/agents/requests/${requestId}`
+      : `/api/estate/requests/${requestId}`;
+    
+    const response = await api.get<{ request: ServerEstateRequest }>(endpoint);
     return this.convertServerRequest(response.request);
   }
 
