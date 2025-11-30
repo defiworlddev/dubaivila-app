@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { EstateRequest, requestService } from '../service/requestService';
-import { useUser } from '../context/UserContext';
 import { formatMoney } from '../utils/formatMoney';
 
 // Import property type images
@@ -35,17 +34,12 @@ const getPropertyImage = (propertyType: string): string => {
 export const RequestList = () => {
   const [requests, setRequests] = useState<EstateRequest[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { user } = useUser();
 
   useEffect(() => {
-    if (user) {
-      loadRequests();
-    }
-  }, [user]);
+    loadRequests();
+  }, []);
 
   const loadRequests = async () => {
-    if (!user) return;
-    
     setIsLoading(true);
     try {
       const allRequests = await requestService.getAllRequests();

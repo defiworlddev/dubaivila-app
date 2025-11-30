@@ -12,7 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/');
   };
 
   return (

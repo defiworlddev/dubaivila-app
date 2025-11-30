@@ -29,11 +29,9 @@ const AppRoutes = () => {
       <Route
         path="/"
         element={
-          <ProtectedRoute>
-            <Layout>
-              <RequestList />
-            </Layout>
-          </ProtectedRoute>
+          <Layout>
+            <RequestList />
+          </Layout>
         }
       />
       <Route
@@ -49,11 +47,9 @@ const AppRoutes = () => {
       <Route
         path="/request/:id"
         element={
-          <ProtectedRoute>
             <Layout>
               <RequestDetail />
             </Layout>
-          </ProtectedRoute>
         }
       />
 

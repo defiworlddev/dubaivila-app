@@ -81,6 +81,8 @@ class RequestService {
     const user = authService.getCurrentUser();
     const isAgent = user?.isAgent;
     
+    // Use public endpoint for non-authenticated users and regular users
+    // Only use agent endpoint if user is authenticated and is an agent
     const endpoint = isAgent 
       ? `/api/agents/requests/${requestId}`
       : `/api/estate/requests/${requestId}`;
