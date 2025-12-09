@@ -1,7 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider, useUser } from './context/UserContext';
 import { Layout } from './components/Layout';
-import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './components/Login';
 import { Verification } from './components/Verification';
 import { Registration } from './components/Registration';
@@ -37,11 +36,9 @@ const AppRoutes = () => {
       <Route
         path="/request/new"
         element={
-          <ProtectedRoute>
-            <Layout>
-              <RequestForm />
-            </Layout>
-          </ProtectedRoute>
+          <Layout>
+            <RequestForm />
+          </Layout>
         }
       />
       <Route

@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { requestService } from '../service/requestService';
 import { useUser } from '../context/UserContext';
 import { formatMoney } from '../utils/formatMoney';
@@ -60,6 +60,7 @@ const STEPS = {
 };
 
 export const RequestForm = () => {
+  const location = useLocation();
   const [currentStep, setCurrentStep] = useState(STEPS.PROPERTY_TYPE);
   const [formData, setFormData] = useState({
     propertyType: '',
@@ -75,6 +76,52 @@ export const RequestForm = () => {
   const [error, setError] = useState('');
   const { user } = useUser();
   const navigate = useNavigate();
+  const hasAutoSubmitted = useRef(false);
+
+  // Restore form data from location state if available (after login redirect)
+  useEffect(() => {
+    const savedFormData = location.state?.formData;
+    
+    if (savedFormData) {
+      setFormData(savedFormData);
+      setCurrentStep(STEPS.REVIEW);
+    }
+  }, [location.state]);
+
+  // Auto-submit request when user becomes available after login
+  useEffect(() => {
+    const savedFormData = location.state?.formData;
+    
+    if (savedFormData && user && !user.isNewUser && !hasAutoSubmitted.current && !isLoading) {
+      hasAutoSubmitted.current = true;
+      const submitRequest = async () => {
+        setIsLoading(true);
+        setError('');
+        try {
+          await requestService.createRequest(user.id, {
+            propertyType: savedFormData.propertyType,
+            location: savedFormData.location,
+            budget: savedFormData.budget,
+            bedrooms: savedFormData.bedrooms || undefined,
+            bathrooms: savedFormData.bathrooms || undefined,
+            surface: savedFormData.surface || undefined,
+            district: savedFormData.district || undefined,
+            additionalRequirements: savedFormData.additionalRequirements || undefined,
+          });
+          setCurrentStep(STEPS.SUCCESS);
+          // Clear location state to prevent re-submission
+          window.history.replaceState({}, document.title);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to create request');
+          hasAutoSubmitted.current = false; // Allow retry on error
+        } finally {
+          setIsLoading(false);
+        }
+      };
+      
+      submitRequest();
+    }
+  }, [user, location.state, isLoading]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -137,8 +184,14 @@ export const RequestForm = () => {
     e.preventDefault();
     setError('');
 
+    // If user is not logged in, redirect to login with form data
     if (!user) {
-      setError('You must be logged in to create a request');
+      navigate('/login', { 
+        state: { 
+          returnPath: '/request/new',
+          formData: formData 
+        } 
+      });
       return;
     }
 
@@ -520,6 +573,21 @@ export const RequestForm = () => {
                         )}
                       </div>
                     </div>
+
+                    {/* Login Notice */}
+                    {!user && (
+                      <div className="mt-6 bg-amber-50 border-2 border-amber-200 rounded-lg p-4">
+                        <div className="flex items-start">
+                          <svg className="w-5 h-5 text-amber-600 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-amber-900 mb-1">Login Required</p>
+                            <p className="text-sm text-amber-800">Please log in to submit your request. Your information will be saved.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

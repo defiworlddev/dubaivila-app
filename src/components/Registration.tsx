@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 export const Registration = () => {
@@ -8,12 +8,20 @@ export const Registration = () => {
   const [error, setError] = useState('');
   const { completeRegistration, user } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnPath = location.state?.returnPath;
+  const formData = location.state?.formData;
 
   useEffect(() => {
     if (user && !user.isNewUser) {
-      navigate('/');
+      // Redirect to return path with form data, or home
+      if (returnPath && formData) {
+        navigate(returnPath, { state: { formData } });
+      } else {
+        navigate('/');
+      }
     }
-  }, [user, navigate]);
+  }, [user, navigate, returnPath, formData]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +40,12 @@ export const Registration = () => {
     setIsLoading(true);
     try {
       await completeRegistration(name.trim());
-      navigate('/');
+      // Redirect to return path with form data, or home
+      if (returnPath && formData) {
+        navigate(returnPath, { state: { formData } });
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to complete registration');
     } finally {

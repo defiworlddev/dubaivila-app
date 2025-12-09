@@ -12,6 +12,8 @@ export const Verification = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const phoneNumber = location.state?.phoneNumber || '';
+  const returnPath = location.state?.returnPath;
+  const formData = location.state?.formData;
 
   useEffect(() => {
     if (!phoneNumber) {
@@ -41,9 +43,19 @@ export const Verification = () => {
       // Check if user needs to complete registration
       const currentUser = authService.getCurrentUser();
       if (currentUser?.isNewUser) {
-        navigate('/register');
+        navigate('/register', { 
+          state: { 
+            returnPath,
+            formData 
+          } 
+        });
       } else {
-        navigate('/');
+        // Redirect to return path with form data, or home
+        if (returnPath && formData) {
+          navigate(returnPath, { state: { formData } });
+        } else {
+          navigate('/');
+        }
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Invalid verification code');

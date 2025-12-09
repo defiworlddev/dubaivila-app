@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useUser } from '../context/UserContext';
 
 export const Login = () => {
@@ -8,6 +8,9 @@ export const Login = () => {
   const [error, setError] = useState('');
   const { login } = useUser();
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnPath = location.state?.returnPath;
+  const formData = location.state?.formData;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +31,13 @@ export const Login = () => {
     setIsLoading(true);
     try {
       await login(phoneNumber);
-      navigate('/verify', { state: { phoneNumber } });
+      navigate('/verify', { 
+        state: { 
+          phoneNumber,
+          returnPath,
+          formData
+        } 
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send verification code');
     } finally {

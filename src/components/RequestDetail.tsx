@@ -199,7 +199,7 @@ export const RequestDetail = () => {
             ) : (
               <div className="bg-white border border-primary-200 rounded p-6">
                 <h3 className="text-lg font-bold text-primary-900 mb-4">Contact Information</h3>
-                <p className="text-sm text-primary-600">Not available</p>
+                <p className="text-sm text-primary-600">Available exclusively to our verified agents.</p>
               </div>
             )}
           </div>
