@@ -4,33 +4,33 @@ import { authService } from './authService';
 export interface EstateRequest {
   id: string;
   userId: string;
-  propertyType: string;
-  location: string;
+  category: string;
+  buyOrRent: string;
   budget: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  surface?: string;
-  district?: string;
-  additionalRequirements?: string;
+  area: string;
+  bed?: string;
+  size?: string;
+  additionalInfo?: string;
   status: 'New Request' | 'Receiving Offers' | 'Deal Closed 💯';
   createdAt: string;
   userPhoneNumber?: string;
+  userName?: string;
 }
 
 interface ServerEstateRequest {
   _id: string;
   userId: string;
-  propertyType: string;
-  location: string;
+  category: string;
+  buyOrRent: string;
   budget: string;
-  bedrooms?: string;
-  bathrooms?: string;
-  surface?: string;
-  district?: string;
-  additionalRequirements?: string;
+  area: string;
+  bed?: string;
+  size?: string;
+  additionalInfo?: string;
   status: 'New Request' | 'Receiving Offers' | 'Deal Closed 💯';
   createdAt: string;
   userPhoneNumber?: string;
+  userName?: string;
 }
 
 class RequestService {
@@ -38,17 +38,17 @@ class RequestService {
     return {
       id: serverRequest._id,
       userId: serverRequest.userId,
-      propertyType: serverRequest.propertyType,
-      location: serverRequest.location,
+      category: serverRequest.category,
+      buyOrRent: serverRequest.buyOrRent,
       budget: serverRequest.budget,
-      bedrooms: serverRequest.bedrooms,
-      bathrooms: serverRequest.bathrooms,
-      surface: serverRequest.surface,
-      district: serverRequest.district,
-      additionalRequirements: serverRequest.additionalRequirements,
+      area: serverRequest.area,
+      bed: serverRequest.bed,
+      size: serverRequest.size,
+      additionalInfo: serverRequest.additionalInfo,
       status: serverRequest.status,
       createdAt: serverRequest.createdAt,
       userPhoneNumber: serverRequest.userPhoneNumber,
+      userName: serverRequest.userName,
     };
   }
 

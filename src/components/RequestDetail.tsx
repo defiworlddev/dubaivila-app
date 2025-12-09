@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EstateRequest, requestService } from '../service/requestService';
 import { formatMoney } from '../utils/formatMoney';
+import { useUser } from '../context/UserContext';
 
 const statusColors = {
   'New Request': 'bg-accent-100 text-accent-800',
@@ -29,9 +30,11 @@ const formatDateTime = (dateString: string): string => {
 export const RequestDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useUser();
   const [request, setRequest] = useState<EstateRequest | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isAgent = user?.isAgent === true;
 
   useEffect(() => {
     if (id) {
@@ -102,7 +105,7 @@ export const RequestDetail = () => {
             ← Back to Requests
           </button>
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-primary-900">{request.location}</h1>
+            <h1 className="text-2xl font-bold text-primary-900">{request.area}</h1>
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="text-xs text-primary-500">Request ID</p>
@@ -124,8 +127,12 @@ export const RequestDetail = () => {
               <h2 className="text-lg font-bold text-primary-900 mb-4">Request Information</h2>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-sm text-primary-500 mb-1">Property Type</p>
-                  <p className="font-semibold text-primary-900">{request.propertyType}</p>
+                  <p className="text-sm text-primary-500 mb-1">Category</p>
+                  <p className="font-semibold text-primary-900">{request.category}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-primary-500 mb-1">Buy/Rent</p>
+                  <p className="font-semibold text-primary-900">{request.buyOrRent}</p>
                 </div>
                 <div>
                   <p className="text-sm text-primary-500 mb-1">Budget</p>
@@ -139,62 +146,60 @@ export const RequestDetail = () => {
             </div>
 
             {/* Property Specifications */}
-            {(request.district || request.bedrooms || request.bathrooms || request.surface) && (
+            {(request.bed || request.size) && (
               <div className="bg-white border border-primary-200 rounded p-6">
                 <h2 className="text-lg font-bold text-primary-900 mb-4">Property Specifications</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  {request.district && (
-                    <div>
-                      <p className="text-sm text-primary-500 mb-1">District</p>
-                      <p className="font-semibold text-primary-900">{request.district}</p>
-                    </div>
-                  )}
-                  {request.bedrooms && (
+                  {request.bed && (
                     <div>
                       <p className="text-sm text-primary-500 mb-1">Bedrooms</p>
-                      <p className="font-semibold text-primary-900">{request.bedrooms}</p>
+                      <p className="font-semibold text-primary-900">{request.bed}</p>
                     </div>
                   )}
-                  {request.bathrooms && (
+                  {request.size && (
                     <div>
-                      <p className="text-sm text-primary-500 mb-1">Bathrooms</p>
-                      <p className="font-semibold text-primary-900">{request.bathrooms}</p>
-                    </div>
-                  )}
-                  {request.surface && (
-                    <div>
-                      <p className="text-sm text-primary-500 mb-1">Surface Area</p>
-                      <p className="font-semibold text-primary-900">{request.surface}</p>
+                      <p className="text-sm text-primary-500 mb-1">Size</p>
+                      <p className="font-semibold text-primary-900">{request.size}</p>
                     </div>
                   )}
                 </div>
               </div>
             )}
 
-            {/* Additional Requirements */}
-            {request.additionalRequirements && (
+            {/* Additional Information */}
+            {request.additionalInfo && (
               <div className="bg-white border border-primary-200 rounded p-6">
-                <h2 className="text-lg font-bold text-primary-900 mb-4">Additional Requirements</h2>
-                <p className="text-primary-700 whitespace-pre-wrap">{request.additionalRequirements}</p>
+                <h2 className="text-lg font-bold text-primary-900 mb-4">Additional Information</h2>
+                <p className="text-primary-700 whitespace-pre-wrap">{request.additionalInfo}</p>
               </div>
             )}
           </div>
 
           {/* Right Column - Contact */}
           <div>
-            {request.userPhoneNumber ? (
+            {isAgent && (request.userPhoneNumber || request.userName) ? (
               <div className="bg-white border border-primary-200 rounded p-6">
                 <h3 className="text-lg font-bold text-primary-900 mb-4">Contact Client</h3>
-                <div className="mb-4">
-                  <p className="text-sm text-primary-500 mb-1">Phone Number</p>
-                  <p className="text-xl font-bold text-primary-900">{request.userPhoneNumber}</p>
-                </div>
-                <a
-                  href={`tel:${request.userPhoneNumber}`}
-                  className="block w-full text-center px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
-                >
-                  Call Now
-                </a>
+                {request.userName && (
+                  <div className="mb-4">
+                    <p className="text-sm text-primary-500 mb-1">Name</p>
+                    <p className="text-lg font-semibold text-primary-900">{request.userName}</p>
+                  </div>
+                )}
+                {request.userPhoneNumber && (
+                  <>
+                    <div className="mb-4">
+                      <p className="text-sm text-primary-500 mb-1">Phone Number</p>
+                      <p className="text-xl font-bold text-primary-900">{request.userPhoneNumber}</p>
+                    </div>
+                    <a
+                      href={`tel:${request.userPhoneNumber}`}
+                      className="block w-full text-center px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700"
+                    >
+                      Call Now
+                    </a>
+                  </>
+                )}
               </div>
             ) : (
               <div className="bg-white border border-primary-200 rounded p-6">

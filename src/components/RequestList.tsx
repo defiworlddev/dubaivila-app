@@ -23,8 +23,9 @@ const statusLabels = {
   'Deal Closed 💯': 'Deal Closed 💯',
 };
 
-const getPropertyImage = (propertyType: string): string => {
-  const type = propertyType.toLowerCase();
+const getPropertyImage = (category: string | undefined): string => {
+  if (!category) return otherImage;
+  const type = category.toLowerCase();
   if (type === 'villa') return villaImage;
   if (type === 'apartment') return apartmentImage;
   if (type === 'office') return officeImage;
@@ -147,8 +148,8 @@ export const RequestList = () => {
               {/* Image Container */}
               <div className="relative w-full h-56 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden">
                 <img
-                  src={getPropertyImage(request.propertyType)}
-                  alt={request.propertyType}
+                  src={getPropertyImage(request.category)}
+                  alt={request.category}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                 />
                 <div className="absolute top-4 right-4">
@@ -164,11 +165,17 @@ export const RequestList = () => {
               <div className="p-6 flex-1 flex flex-col">
                 <div className="flex-1">
                   <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-700 transition-colors line-clamp-2">
-                    {request.location}
+                    {request.area}
                   </h3>
-                  <p className="text-sm font-medium text-primary-600 uppercase tracking-wide mb-4">
-                    {request.propertyType}
-                  </p>
+                  <div className="flex items-center gap-2 mb-2">
+                    <p className="text-sm font-medium text-primary-600 uppercase tracking-wide">
+                      {request.category}
+                    </p>
+                    <span className="text-primary-400">•</span>
+                    <p className="text-sm font-medium text-primary-700">
+                      {request.buyOrRent}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Budget Section */}

@@ -52,25 +52,26 @@ const propertyTypes: PropertyTypeOption[] = [
 ];
 
 const STEPS = {
-  PROPERTY_TYPE: 1,
-  LOCATION_BUDGET: 2,
-  DETAILS: 3,
-  REVIEW: 4,
-  SUCCESS: 5,
+  CATEGORY: 1,
+  BUY_RENT: 2,
+  BUDGET_AREA: 3,
+  BED_SIZE: 4,
+  ADDITIONAL_INFO: 5,
+  REVIEW: 6,
+  SUCCESS: 7,
 };
 
 export const RequestForm = () => {
   const location = useLocation();
-  const [currentStep, setCurrentStep] = useState(STEPS.PROPERTY_TYPE);
+  const [currentStep, setCurrentStep] = useState(STEPS.CATEGORY);
   const [formData, setFormData] = useState({
-    propertyType: '',
-    location: '',
+    category: '',
+    buyOrRent: '',
     budget: '',
-    bedrooms: '',
-    bathrooms: '',
-    surface: '',
-    district: '',
-    additionalRequirements: '',
+    area: '',
+    bed: '',
+    size: '',
+    additionalInfo: '',
   });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -99,14 +100,13 @@ export const RequestForm = () => {
         setError('');
         try {
           await requestService.createRequest(user.id, {
-            propertyType: savedFormData.propertyType,
-            location: savedFormData.location,
+            category: savedFormData.category,
+            buyOrRent: savedFormData.buyOrRent,
             budget: savedFormData.budget,
-            bedrooms: savedFormData.bedrooms || undefined,
-            bathrooms: savedFormData.bathrooms || undefined,
-            surface: savedFormData.surface || undefined,
-            district: savedFormData.district || undefined,
-            additionalRequirements: savedFormData.additionalRequirements || undefined,
+            area: savedFormData.area,
+            bed: savedFormData.bed || undefined,
+            size: savedFormData.size || undefined,
+            additionalInfo: savedFormData.additionalInfo || undefined,
           });
           setCurrentStep(STEPS.SUCCESS);
           // Clear location state to prevent re-submission
@@ -133,36 +133,74 @@ export const RequestForm = () => {
     setError('');
   };
 
-  const handlePropertyTypeSelect = (type: string) => {
-    setFormData({ ...formData, propertyType: type });
+  const handleBudgetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Remove all non-digit characters except spaces and hyphens (remove commas to re-format)
+    const cleaned = value.replace(/[^\d\s-]/g, '');
+    
+    // Format numbers with thousand separators
+    // Split by hyphens and spaces to handle ranges like "2000000 - 3000000" or "2000000-3000000"
+    const parts = cleaned.split(/(\s*-\s*)/);
+    const formattedParts = parts.map(part => {
+      // If it's a separator (hyphen with optional spaces), keep it as is
+      if (/^\s*-\s*$/.test(part)) {
+        return part.trim() === '-' ? ' - ' : part;
+      }
+      // Extract digits only from this part
+      const digits = part.replace(/\D/g, '');
+      if (!digits) return part;
+      // Format with thousand separators
+      return parseInt(digits, 10).toLocaleString('en-US');
+    });
+    
+    const formatted = formattedParts.join('');
+    
+    setFormData({
+      ...formData,
+      budget: formatted,
+    });
+    setError('');
+  };
+
+  const handleCategorySelect = (category: string) => {
+    setFormData({ ...formData, category });
     setError('');
     // Auto-advance to next step
     setTimeout(() => {
-      setCurrentStep(STEPS.LOCATION_BUDGET);
+      setCurrentStep(STEPS.BUY_RENT);
     }, 300);
   };
 
   const validateStep = (step: number): boolean => {
     setError('');
     switch (step) {
-      case STEPS.PROPERTY_TYPE:
-        if (!formData.propertyType) {
-          setError('Please select a property type');
+      case STEPS.CATEGORY:
+        if (!formData.category) {
+          setError('Please select a category');
           return false;
         }
         return true;
-      case STEPS.LOCATION_BUDGET:
-        if (!formData.location.trim()) {
-          setError('Please enter a location');
+      case STEPS.BUY_RENT:
+        if (!formData.buyOrRent) {
+          setError('Please select Buy or Rent');
           return false;
         }
+        return true;
+      case STEPS.BUDGET_AREA:
         if (!formData.budget.trim()) {
           setError('Please enter your budget');
           return false;
         }
+        if (!formData.area.trim()) {
+          setError('Please enter the area');
+          return false;
+        }
         return true;
-      case STEPS.DETAILS:
-        return true; // Details are optional
+      case STEPS.BED_SIZE:
+        return true; // Bed and size are optional
+      case STEPS.ADDITIONAL_INFO:
+        return true; // Additional info is optional
       default:
         return true;
     }
@@ -176,7 +214,7 @@ export const RequestForm = () => {
   };
 
   const handleBack = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, STEPS.PROPERTY_TYPE));
+    setCurrentStep((prev) => Math.max(prev - 1, STEPS.CATEGORY));
     setError('');
   };
 
@@ -198,14 +236,13 @@ export const RequestForm = () => {
     setIsLoading(true);
     try {
       await requestService.createRequest(user.id, {
-        propertyType: formData.propertyType,
-        location: formData.location,
+        category: formData.category,
+        buyOrRent: formData.buyOrRent,
         budget: formData.budget,
-        bedrooms: formData.bedrooms || undefined,
-        bathrooms: formData.bathrooms || undefined,
-        surface: formData.surface || undefined,
-        district: formData.district || undefined,
-        additionalRequirements: formData.additionalRequirements || undefined,
+        area: formData.area,
+        bed: formData.bed || undefined,
+        size: formData.size || undefined,
+        additionalInfo: formData.additionalInfo || undefined,
       });
       setCurrentStep(STEPS.SUCCESS);
     } catch (err) {
@@ -253,77 +290,137 @@ export const RequestForm = () => {
         </div>
       </div>
 
-      <div className={`${currentStep === STEPS.PROPERTY_TYPE ? 'bg-transparent' : 'bg-white rounded-md shadow-sm'} overflow-hidden flex flex-col flex-1 min-h-0`}>
-        {/* Step 1: Property Type Selection */}
-        {currentStep === STEPS.PROPERTY_TYPE && (
+      <div className={`${currentStep === STEPS.CATEGORY ? 'bg-transparent' : 'bg-white rounded-md shadow-sm'} overflow-hidden flex flex-col flex-1 min-h-0`}>
+        {/* Step 1: Category Selection */}
+        {currentStep === STEPS.CATEGORY && (
           <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-0 justify-center">
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8 max-w-5xl mx-auto w-full">
+            <div className="max-w-md mx-auto w-full space-y-3">
               {propertyTypes.map((type) => (
                 <button
                   key={type.value}
                   type="button"
-                  onClick={() => handlePropertyTypeSelect(type.value)}
+                  onClick={() => handleCategorySelect(type.value)}
                   className={`
-                    group relative overflow-hidden rounded-md transition-all duration-300 flex flex-col
-                    bg-white shadow-md hover:shadow-xl transform hover:-translate-y-1
-                    ${formData.propertyType === type.value 
-                      ? 'ring-4 ring-primary-600 ring-offset-2 shadow-xl scale-105' 
-                      : 'hover:shadow-lg'
+                    w-full relative overflow-hidden rounded-lg transition-all duration-300
+                    flex items-center px-4 py-3.5
+                    bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md
+                    ${formData.category === type.value 
+                      ? 'ring-2 ring-primary-600 shadow-md bg-primary-50' 
+                      : 'hover:bg-primary-50/50'
                     }
                   `}
                 >
-                  <div className="aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary-50 to-primary-100 flex-shrink-0 flex items-center justify-center">
-                    <img
-                      src={type.image}
-                      alt={type.label}
-                      className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-110"
-                    />
-                  </div>
-                  <div className="p-3 sm:p-4 text-center bg-white flex-shrink-0">
-                    <p className={`text-sm sm:text-base font-semibold transition-colors ${
-                      formData.propertyType === type.value 
-                        ? 'text-primary-700' 
-                        : 'text-primary-900 group-hover:text-primary-700'
-                    }`}>
-                      {type.label}
-                    </p>
-                  </div>
+                  <p className={`
+                    text-base font-semibold transition-colors flex-1 text-left
+                    ${formData.category === type.value 
+                      ? 'text-primary-700' 
+                      : 'text-primary-900'
+                    }
+                  `}>
+                    {type.label}
+                  </p>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-          {/* Step 2: Location and Budget */}
-          {currentStep === STEPS.LOCATION_BUDGET && (
+        {/* Step 2: Buy/Rent Selection */}
+        {currentStep === STEPS.BUY_RENT && (
+          <div className="p-4 sm:p-6 flex-1 flex flex-col min-h-0 justify-center">
+            <div className="max-w-md mx-auto w-full space-y-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, buyOrRent: 'Buy' });
+                  setError('');
+                  setTimeout(() => {
+                    setCurrentStep(STEPS.BUDGET_AREA);
+                  }, 300);
+                }}
+                className={`
+                  w-full relative overflow-hidden rounded-lg transition-all duration-300
+                  flex items-center px-4 py-3.5
+                  bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md
+                  ${formData.buyOrRent === 'Buy' 
+                    ? 'ring-2 ring-primary-600 shadow-md bg-primary-50' 
+                    : 'hover:bg-primary-50/50'
+                  }
+                `}
+              >
+                <p className={`
+                  text-base font-semibold transition-colors flex-1 text-left
+                  ${formData.buyOrRent === 'Buy' 
+                    ? 'text-primary-700' 
+                    : 'text-primary-900'
+                  }
+                `}>
+                  Buy
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFormData({ ...formData, buyOrRent: 'Rent' });
+                  setError('');
+                  setTimeout(() => {
+                    setCurrentStep(STEPS.BUDGET_AREA);
+                  }, 300);
+                }}
+                className={`
+                  w-full relative overflow-hidden rounded-lg transition-all duration-300
+                  flex items-center px-4 py-3.5
+                  bg-white/90 backdrop-blur-sm shadow-sm hover:shadow-md
+                  ${formData.buyOrRent === 'Rent' 
+                    ? 'ring-2 ring-primary-600 shadow-md bg-primary-50' 
+                    : 'hover:bg-primary-50/50'
+                  }
+                `}
+              >
+                <p className={`
+                  text-base font-semibold transition-colors flex-1 text-left
+                  ${formData.buyOrRent === 'Rent' 
+                    ? 'text-primary-700' 
+                    : 'text-primary-900'
+                  }
+                `}>
+                  Rent
+                </p>
+              </button>
+            </div>
+          </div>
+        )}
+
+          {/* Step 3: Budget and Area */}
+          {currentStep === STEPS.BUDGET_AREA && (
             <div className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto w-full flex-1 flex flex-col justify-center">
               <div>
-                <label htmlFor="location" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                  Preferred Location <span className="text-red-500">*</span>
-                </label>
-                <input
-                  id="location"
-                  name="location"
-                  type="text"
-                  value={formData.location}
-                  onChange={handleChange}
-                  placeholder="e.g., Dubai Marina, Palm Jumeirah, Downtown Dubai"
-                  className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 placeholder-primary-500 text-base bg-white"
-                  required
-                />
-              </div>
-
-              <div>
                 <label htmlFor="budget" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                  Budget Range <span className="text-red-500">*</span>
+                  Budget Range (AED) <span className="text-red-500">*</span>
                 </label>
                 <input
                   id="budget"
                   name="budget"
                   type="text"
                   value={formData.budget}
+                  onChange={handleBudgetChange}
+                  placeholder="e.g., 2,000,000 - 3,000,000"
+                  className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 placeholder-primary-500 text-base bg-white"
+                  required
+                />
+              </div>
+
+              <div>
+                <label htmlFor="area" className="block text-sm font-semibold text-primary-900 mb-1.5">
+                  Preferred Area <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="area"
+                  name="area"
+                  type="text"
+                  value={formData.area}
                   onChange={handleChange}
-                  placeholder="e.g., AED 2,000,000 - 3,000,000"
+                  placeholder="e.g., Dubai Marina, Palm Jumeirah, Downtown Dubai"
                   className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 placeholder-primary-500 text-base bg-white"
                   required
                 />
@@ -331,18 +428,18 @@ export const RequestForm = () => {
             </div>
           )}
 
-          {/* Step 3: Property Details */}
-          {currentStep === STEPS.DETAILS && (
+          {/* Step 4: Bed and Size */}
+          {currentStep === STEPS.BED_SIZE && (
             <div className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto w-full flex-1 flex flex-col justify-center">
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label htmlFor="bedrooms" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                    Bedrooms
+                  <label htmlFor="bed" className="block text-sm font-semibold text-primary-900 mb-1.5">
+                    Bedrooms <span className="text-primary-500 font-normal text-xs">(Optional)</span>
                   </label>
                   <select
-                    id="bedrooms"
-                    name="bedrooms"
-                    value={formData.bedrooms}
+                    id="bed"
+                    name="bed"
+                    value={formData.bed}
                     onChange={handleChange}
                     className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 bg-white text-base"
                   >
@@ -356,77 +453,46 @@ export const RequestForm = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="bathrooms" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                    Bathrooms
-                  </label>
-                  <select
-                    id="bathrooms"
-                    name="bathrooms"
-                    value={formData.bathrooms}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 bg-white text-base"
-                  >
-                    <option value="" className="text-primary-900">Any</option>
-                    <option value="1" className="text-primary-900">1 Bathroom</option>
-                    <option value="2" className="text-primary-900">2 Bathrooms</option>
-                    <option value="3" className="text-primary-900">3 Bathrooms</option>
-                    <option value="4+" className="text-primary-900">4+ Bathrooms</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <div>
-                  <label htmlFor="surface" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                    Surface Area
+                  <label htmlFor="size" className="block text-sm font-semibold text-primary-900 mb-1.5">
+                    Size <span className="text-primary-500 font-normal text-xs">(Optional)</span>
                   </label>
                   <input
-                    id="surface"
-                    name="surface"
+                    id="size"
+                    name="size"
                     type="text"
-                    value={formData.surface}
+                    value={formData.size}
                     onChange={handleChange}
                     placeholder="e.g., 150 sqft, 2000 sqft"
                     className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 placeholder-primary-500 text-base bg-white"
                   />
                 </div>
-
-                <div>
-                  <label htmlFor="district" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                    District / Area
-                  </label>
-                  <input
-                    id="district"
-                    name="district"
-                    type="text"
-                    value={formData.district}
-                    onChange={handleChange}
-                    placeholder="e.g., Dubai Marina, Business Bay"
-                    className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition-all text-primary-900 placeholder-primary-500 text-base bg-white"
-                  />
-                </div>
               </div>
+            </div>
+          )}
 
+          {/* Step 5: Additional Info */}
+          {currentStep === STEPS.ADDITIONAL_INFO && (
+            <div className="p-4 sm:p-6 space-y-4 max-w-2xl mx-auto w-full flex-1 flex flex-col justify-center">
               <div>
-                <label htmlFor="additionalRequirements" className="block text-sm font-semibold text-primary-900 mb-1.5">
-                  Additional Requirements <span className="text-primary-500 font-normal text-xs">(Optional)</span>
+                <label htmlFor="additionalInfo" className="block text-sm font-semibold text-primary-900 mb-1.5">
+                  Additional Information <span className="text-primary-500 font-normal text-xs">(Optional)</span>
                 </label>
                 <textarea
-                  id="additionalRequirements"
-                  name="additionalRequirements"
-                  value={formData.additionalRequirements}
+                  id="additionalInfo"
+                  name="additionalInfo"
+                  value={formData.additionalInfo}
                   onChange={handleChange}
-                  rows={3}
-                  placeholder="e.g., sea view, parking, gym, pool, furnished"
+                  rows={5}
+                  placeholder="e.g., sea view, parking, gym, pool, furnished, or any other requirements"
                   className="w-full px-4 py-2.5 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none resize-none text-primary-900 placeholder-primary-500 text-base transition-all bg-white"
                 />
               </div>
             </div>
           )}
 
-          {/* Step 4: Review */}
+          {/* Step 6: Review */}
           {currentStep === STEPS.REVIEW && (() => {
-            const selectedProperty = propertyTypes.find(pt => pt.value === formData.propertyType);
+            const selectedProperty = propertyTypes.find(pt => pt.value === formData.category);
             return (
               <div className="p-4 sm:p-6 max-w-4xl mx-auto w-full flex-1 flex flex-col min-h-0">
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-primary-200 flex flex-col flex-1 min-h-0">
@@ -445,13 +511,13 @@ export const RequestForm = () => {
                           <div className="aspect-[4/3] overflow-hidden">
                             <img
                               src={selectedProperty?.image || otherImage}
-                              alt={formData.propertyType}
+                              alt={formData.category}
                               className="w-full h-full object-cover"
                             />
                           </div>
                           <div className="absolute top-3 left-3">
                             <span className="bg-primary-700 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
-                              {formData.propertyType}
+                              {formData.category}
                             </span>
                           </div>
                         </div>
@@ -473,7 +539,33 @@ export const RequestForm = () => {
                           </h3>
                         </div>
 
-                        {/* Location */}
+                        {/* Category */}
+                        <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
+                          <div className="flex items-start">
+                            <svg className="w-5 h-5 text-primary-700 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Category</p>
+                              <p className="text-base font-semibold text-primary-900">{formData.category}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Buy/Rent */}
+                        <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
+                          <div className="flex items-start">
+                            <svg className="w-5 h-5 text-primary-700 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <div className="flex-1">
+                              <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Transaction Type</p>
+                              <p className="text-base font-semibold text-primary-900">{formData.buyOrRent}</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Area */}
                         <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                           <div className="flex items-start">
                             <svg className="w-5 h-5 text-primary-700 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -481,8 +573,8 @@ export const RequestForm = () => {
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                             </svg>
                             <div className="flex-1">
-                              <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Location</p>
-                              <p className="text-base font-semibold text-primary-900">{formData.location}</p>
+                              <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-1">Preferred Area</p>
+                              <p className="text-base font-semibold text-primary-900">{formData.area}</p>
                             </div>
                           </div>
                         </div>
@@ -500,10 +592,10 @@ export const RequestForm = () => {
                           </div>
                         </div>
 
-                        {/* Bedrooms & Bathrooms */}
-                        {(formData.bedrooms || formData.bathrooms) && (
+                        {/* Bed & Size */}
+                        {(formData.bed || formData.size) && (
                           <div className="grid grid-cols-2 gap-3">
-                            {formData.bedrooms && (
+                            {formData.bed && (
                               <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                                 <div className="flex items-center mb-2">
                                   <svg className="w-4 h-4 text-primary-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -511,62 +603,33 @@ export const RequestForm = () => {
                                   </svg>
                                   <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Bedrooms</p>
                                 </div>
-                                <p className="text-lg font-bold text-primary-900">{formData.bedrooms}</p>
+                                <p className="text-lg font-bold text-primary-900">{formData.bed}</p>
                               </div>
                             )}
-                            {formData.bathrooms && (
-                              <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
-                                <div className="flex items-center mb-2">
-                                  <svg className="w-4 h-4 text-primary-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z" />
-                                  </svg>
-                                  <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Bathrooms</p>
-                                </div>
-                                <p className="text-lg font-bold text-primary-900">{formData.bathrooms}</p>
-                              </div>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Surface & District */}
-                        {(formData.surface || formData.district) && (
-                          <div className="grid grid-cols-2 gap-3">
-                            {formData.surface && (
+                            {formData.size && (
                               <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                                 <div className="flex items-center mb-2">
                                   <svg className="w-4 h-4 text-primary-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                                   </svg>
-                                  <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Surface Area</p>
+                                  <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide">Size</p>
                                 </div>
-                                <p className="text-lg font-bold text-primary-900">{formData.surface}</p>
-                              </div>
-                            )}
-                            {formData.district && (
-                              <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
-                                <div className="flex items-center mb-2">
-                                  <svg className="w-4 h-4 text-primary-700 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                  </svg>
-                                  <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide">District / Area</p>
-                                </div>
-                                <p className="text-lg font-bold text-primary-900">{formData.district}</p>
+                                <p className="text-lg font-bold text-primary-900">{formData.size}</p>
                               </div>
                             )}
                           </div>
                         )}
 
-                        {/* Additional Requirements */}
-                        {formData.additionalRequirements && (
+                        {/* Additional Info */}
+                        {formData.additionalInfo && (
                           <div className="bg-primary-50 rounded-lg p-4 border border-primary-200">
                             <div className="flex items-start mb-2">
                               <svg className="w-5 h-5 text-primary-700 mr-3 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                               </svg>
                               <div className="flex-1">
-                                <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-2">Additional Requirements</p>
-                                <p className="text-sm text-primary-900 leading-relaxed">{formData.additionalRequirements}</p>
+                                <p className="text-xs font-semibold text-primary-600 uppercase tracking-wide mb-2">Additional Information</p>
+                                <p className="text-sm text-primary-900 leading-relaxed">{formData.additionalInfo}</p>
                               </div>
                             </div>
                           </div>
@@ -601,9 +664,9 @@ export const RequestForm = () => {
         )}
 
         {/* Navigation Buttons */}
-        {currentStep !== STEPS.PROPERTY_TYPE && (
+        {currentStep !== STEPS.CATEGORY && currentStep !== STEPS.BUY_RENT && (
           <div className="flex gap-3 px-4 sm:px-6 pb-4 sm:pb-6 border-t border-primary-200 pt-4 flex-shrink-0">
-            {currentStep > STEPS.PROPERTY_TYPE && (
+            {currentStep > STEPS.CATEGORY && (
               <button
                 type="button"
                 onClick={handleBack}
