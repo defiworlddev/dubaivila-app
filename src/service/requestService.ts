@@ -12,7 +12,7 @@ export interface EstateRequest {
   surface?: string;
   district?: string;
   additionalRequirements?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: 'New Request' | 'Receiving Offers' | 'Deal Closed 💯';
   createdAt: string;
   userPhoneNumber?: string;
 }
@@ -28,7 +28,7 @@ interface ServerEstateRequest {
   surface?: string;
   district?: string;
   additionalRequirements?: string;
-  status: 'pending' | 'in_progress' | 'completed';
+  status: 'New Request' | 'Receiving Offers' | 'Deal Closed 💯';
   createdAt: string;
   userPhoneNumber?: string;
 }

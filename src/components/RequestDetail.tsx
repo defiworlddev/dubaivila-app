@@ -4,15 +4,15 @@ import { EstateRequest, requestService } from '../service/requestService';
 import { formatMoney } from '../utils/formatMoney';
 
 const statusColors = {
-  pending: 'bg-accent-100 text-accent-800',
-  in_progress: 'bg-primary-100 text-primary-800',
-  completed: 'bg-green-100 text-green-800',
+  'New Request': 'bg-accent-100 text-accent-800',
+  'Receiving Offers': 'bg-primary-100 text-primary-800',
+  'Deal Closed 💯': 'bg-green-100 text-green-800',
 };
 
 const statusLabels = {
-  pending: 'Pending',
-  in_progress: 'In Progress',
-  completed: 'Completed',
+  'New Request': 'New Request',
+  'Receiving Offers': 'Receiving Offers',
+  'Deal Closed 💯': 'Deal Closed 💯',
 };
 
 const formatDateTime = (dateString: string): string => {
