@@ -3,12 +3,6 @@ import { Link } from 'react-router-dom';
 import { EstateRequest, requestService } from '../service/requestService';
 import { formatMoney } from '../utils/formatMoney';
 
-// Import property type images
-import villaImage from '../assets/villa.webp';
-import apartmentImage from '../assets/apartment.webp';
-import officeImage from '../assets/office.webp';
-import storeImage from '../assets/store.webp';
-import otherImage from '../assets/other.webp';
 import dubiaBg from '../assets/dubia-bg.jpg';
 
 const statusColors = {
@@ -21,16 +15,6 @@ const statusLabels = {
   'New Request': 'New Request',
   'Receiving Offers': 'Receiving Offers',
   'Deal Closed 💯': 'Deal Closed 💯',
-};
-
-const getPropertyImage = (category: string | undefined): string => {
-  if (!category) return otherImage;
-  const type = category.toLowerCase();
-  if (type === 'villa') return villaImage;
-  if (type === 'apartment') return apartmentImage;
-  if (type === 'office') return officeImage;
-  if (type === 'store' || type === 'retail store') return storeImage;
-  return otherImage;
 };
 
 export const RequestList = () => {
@@ -145,37 +129,28 @@ export const RequestList = () => {
               to={`/request/${request.id}`}
               className="group bg-white rounded-xl border border-gray-200 hover:border-primary-300 hover:shadow-xl transition-all duration-300 overflow-hidden h-full flex flex-col"
             >
-              {/* Image Container */}
-              <div className="relative w-full h-56 bg-gradient-to-br from-primary-50 to-primary-100 overflow-hidden">
-                <img
-                  src={getPropertyImage(request.category)}
-                  alt={request.category}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                />
-                <div className="absolute top-4 right-4">
+              {/* Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-700 transition-colors line-clamp-2">
+                      {request.area}
+                    </h3>
+                  </div>
                   <span
-                    className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-md backdrop-blur-sm ${statusColors[request.status]}`}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold shadow-md ${statusColors[request.status]}`}
                   >
                     {statusLabels[request.status]}
                   </span>
                 </div>
-              </div>
-
-              {/* Content */}
-              <div className="p-6 flex-1 flex flex-col">
-                <div className="flex-1">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary-700 transition-colors line-clamp-2">
-                    {request.area}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-2">
-                    <p className="text-sm font-medium text-primary-600 uppercase tracking-wide">
-                      {request.category}
-                    </p>
-                    <span className="text-primary-400">•</span>
-                    <p className="text-sm font-medium text-primary-700">
-                      {request.buyOrRent}
-                    </p>
-                  </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <p className="text-sm font-medium text-primary-600 uppercase tracking-wide">
+                    {request.category}
+                  </p>
+                  <span className="text-primary-400">•</span>
+                  <p className="text-sm font-medium text-primary-700">
+                    {request.buyOrRent}
+                  </p>
                 </div>
 
                 {/* Budget Section */}
