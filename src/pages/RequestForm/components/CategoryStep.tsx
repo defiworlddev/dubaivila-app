@@ -1,4 +1,4 @@
-import { useRequestForm, STEPS } from '../../../hooks/requests/useRequestForm';
+import { useRequestForm } from '../../../hooks/requests/useRequestForm';
 import { propertyTypes } from '../constants/propertyTypes';
 
 interface CategoryStepProps {

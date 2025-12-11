@@ -1,7 +1,5 @@
 import { Link } from 'react-router-dom';
 import { useRequestList } from '../../hooks/requests/useRequestList';
-import { EstateRequest } from '../../service/requestService';
-import { formatMoney } from '../../utils/formatMoney';
 import { HeroSection } from './components/HeroSection';
 import { RequestCard } from './components/RequestCard';
 import dubiaBg from '../../assets/dubia-bg.jpg';
