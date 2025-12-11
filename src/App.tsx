@@ -1,12 +1,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UserProvider, useUser } from './context/UserContext';
 import { Layout } from './components/Layout';
-import { Login } from './components/Login';
-import { Verification } from './components/Verification';
-import { Registration } from './components/Registration';
-import { RequestList } from './components/RequestList';
-import { RequestForm } from './components/RequestForm';
-import { RequestDetail } from './components/RequestDetail';
+import { Login } from './pages/Login';
+import { Verification } from './pages/Verification';
+import { Registration } from './pages/Registration';
+import { RequestList } from './pages/RequestList';
+import { RequestForm } from './pages/RequestForm';
+import { RequestDetail } from './pages/RequestDetail';
 
 const AppRoutes = () => {
   const { isLoading } = useUser();
@@ -44,9 +44,9 @@ const AppRoutes = () => {
       <Route
         path="/request/:id"
         element={
-            <Layout>
-              <RequestDetail />
-            </Layout>
+          <Layout>
+            <RequestDetail />
+          </Layout>
         }
       />
 
@@ -64,4 +64,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

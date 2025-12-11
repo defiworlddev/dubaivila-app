@@ -1,66 +1,14 @@
-import { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useRegistration } from '../../hooks/auth/useRegistration';
 
 export const Registration = () => {
-  const [name, setName] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { completeRegistration, user } = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const returnPath = location.state?.returnPath;
-  const formData = location.state?.formData;
-
-  useEffect(() => {
-    if (user && !user.isNewUser) {
-      // Redirect to return path with form data, or home
-      if (returnPath && formData) {
-        navigate(returnPath, { state: { formData } });
-      } else {
-        navigate('/');
-      }
-    }
-  }, [user, navigate, returnPath, formData]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-
-    if (!name.trim()) {
-      setError('Please enter your name');
-      return;
-    }
-
-    if (name.trim().length < 2) {
-      setError('Name must be at least 2 characters');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await completeRegistration(name.trim());
-      // Redirect to return path with form data, or home
-      if (returnPath && formData) {
-        navigate(returnPath, { state: { formData } });
-      } else {
-        navigate('/');
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to complete registration');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { name, isLoading, error, handleChange, handleSubmit } = useRegistration();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 px-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 border border-primary-100">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary-900 mb-2">Welcome!</h1>
-          <p className="text-primary-700 font-medium">
-            Please provide your name to complete registration
-          </p>
+          <p className="text-primary-700 font-medium">Please provide your name to complete registration</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -72,7 +20,7 @@ export const Registration = () => {
               id="name"
               type="text"
               value={name}
-              onChange={(e) => setName(e.target.value)}
+              onChange={(e) => handleChange(e.target.value)}
               placeholder="John Doe"
               className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition text-primary-900 placeholder-primary-500 bg-white"
               disabled={isLoading}

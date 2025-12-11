@@ -1,49 +1,7 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useUser } from '../context/UserContext';
+import { useLogin } from '../../hooks/auth/useLogin';
 
 export const Login = () => {
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
-  const { login } = useUser();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const returnPath = location.state?.returnPath;
-  const formData = location.state?.formData;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError('');
-    
-    if (!phoneNumber.trim()) {
-      setError('Please enter your phone number');
-      return;
-    }
-
-    // Basic phone number validation
-    const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
-    if (!phoneRegex.test(phoneNumber)) {
-      setError('Please enter a valid phone number');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await login(phoneNumber);
-      navigate('/verify', { 
-        state: { 
-          phoneNumber,
-          returnPath,
-          formData
-        } 
-      });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to send verification code');
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { phoneNumber, isLoading, error, handleChange, handleSubmit } = useLogin();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 via-white to-primary-100 px-4">
@@ -62,14 +20,12 @@ export const Login = () => {
               id="phone"
               type="tel"
               value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
+              onChange={(e) => handleChange(e.target.value)}
               placeholder="+971 50 123 4567"
               className="w-full px-4 py-3 border border-primary-200 rounded-lg focus:ring-2 focus:ring-primary-600 focus:border-primary-600 outline-none transition text-primary-900 placeholder-primary-500 bg-white"
               disabled={isLoading}
             />
-            <p className="mt-2 text-xs text-primary-600">
-              We'll send you a verification code via WhatsApp
-            </p>
+            <p className="mt-2 text-xs text-primary-600">We'll send you a verification code via WhatsApp</p>
           </div>
 
           {error && (
