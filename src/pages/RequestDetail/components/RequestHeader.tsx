@@ -1,9 +1,9 @@
 import { EstateRequest } from '../../../service/requestService';
 
 const statusColors = {
-  'New Request': 'bg-accent-100 text-accent-800',
-  'Receiving Offers': 'bg-primary-100 text-primary-800',
-  'Deal Closed 💯': 'bg-green-100 text-green-800',
+  'New Request': 'bg-[#A3E4D7] text-[#0F5132]',
+  'Receiving Offers': 'bg-[#D4AF37] text-[#1C1C1C]',
+  'Deal Closed 💯': 'bg-[#2C3E50] text-white',
 };
 
 const statusLabels = {

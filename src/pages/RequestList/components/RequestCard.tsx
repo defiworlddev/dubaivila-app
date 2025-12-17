@@ -3,9 +3,9 @@ import { EstateRequest } from '../../../service/requestService';
 import { formatMoney } from '../../../utils/formatMoney';
 
 const statusColors = {
-  'New Request': 'bg-blue-50 text-blue-700 border border-blue-200',
-  'Receiving Offers': 'bg-amber-50 text-amber-700 border border-amber-200',
-  'Deal Closed 💯': 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  'New Request': 'bg-[#A3E4D7] text-[#0F5132] border border-[#7DD3C1]',
+  'Receiving Offers': 'bg-[#D4AF37] text-[#1C1C1C] border border-[#B8941F]',
+  'Deal Closed 💯': 'bg-[#2C3E50] text-white border border-[#1A252F]',
 };
 
 const statusLabels = {
